@@ -23,6 +23,9 @@ from flask import url_for  # noqa: F401 pylint: disable=unused-import
 from service.models import Product
 from service.common import status  # HTTP Status Codes
 from . import app
+from service.models import Product, Category
+
+
 
 
 ######################################################################
@@ -97,6 +100,24 @@ def create_products():
 ######################################################################
 # L I S T   A L L   P R O D U C T S
 ######################################################################
+@app.route("/products", methods=["GET"])
+def list_products():
+    """List all Products with optional filters"""
+    name = request.args.get("name")
+    category = request.args.get("category")
+    available = request.args.get("available")
+
+    if name:
+        products = Product.find_by_name(name)
+    elif category:
+        products = Product.find_by_category(Category[category])
+    elif available:
+        products = Product.find_by_availability(available.lower() == "true")
+    else:
+        products = Product.all()
+
+    results = [product.serialize() for product in products]
+    return jsonify(results), status.HTTP_200_OK
 
 #
 # PLACE YOUR CODE TO LIST ALL PRODUCTS HERE
@@ -124,6 +145,18 @@ def get_product(product_id):
 ######################################################################
 # U P D A T E   A   P R O D U C T
 ######################################################################
+@app.route("/products/<int:product_id>", methods=["PUT"])
+def update_product(product_id):
+    """Update a Product"""
+    product = Product.find(product_id)
+    if not product:
+        abort(status.HTTP_404_NOT_FOUND, "Product not found")
+
+    data = request.get_json()
+    product.deserialize(data)
+    product.update()
+
+    return jsonify(product.serialize()), status.HTTP_200_OK
 
 #
 # PLACE YOUR CODE TO UPDATE A PRODUCT HERE
@@ -132,7 +165,13 @@ def get_product(product_id):
 ######################################################################
 # D E L E T E   A   P R O D U C T
 ######################################################################
-
+@app.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    """Delete a Product"""
+    product = Product.find(product_id)
+    if product:
+        product.delete()
+    return "", status.HTTP_204_NO_CONTENT
 
 #
 # PLACE YOUR CODE TO DELETE A PRODUCT HERE
