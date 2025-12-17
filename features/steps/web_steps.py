@@ -105,6 +105,55 @@ def step_impl(context, element_name):
 ##################################################################
 
 ## UPDATE CODE HERE ##
+##################################################################
+# BUTTON CLICKS
+##################################################################
+
+@when('I press the "{button}" button')
+def step_impl(context, button):
+    """Press a button by name"""
+    context.browser.find_by_value(button).click()
+
+
+##################################################################
+# VERIFY TEXT IS PRESENT
+##################################################################
+
+@then('I should see "{text}" in the results')
+def step_impl(context, text):
+    """Verify text appears in results table"""
+    page = context.browser.html
+    assert text in page
+
+
+@then('I should see "{text}" in the "{field}" field')
+def step_impl(context, text, field):
+    """Verify text appears in a field"""
+    element = context.browser.find_by_id(field.lower()).first
+    assert element.value == text
+
+
+##################################################################
+# VERIFY TEXT IS NOT PRESENT
+##################################################################
+
+@then('I should not see "{text}" in the results')
+def step_impl(context, text):
+    """Verify text does not appear in results"""
+    page = context.browser.html
+    assert text not in page
+
+
+##################################################################
+# VERIFY MESSAGE
+##################################################################
+
+@then('I should see the message "{message}"')
+def step_impl(context, message):
+    """Verify a flash message is displayed"""
+    page = context.browser.html
+    assert message in page
+
 
 ##################################################################
 # This code works because of the following naming convention:
